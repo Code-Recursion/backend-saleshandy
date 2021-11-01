@@ -3,6 +3,10 @@ const app = express();
 const fetch = require("node-fetch");
 app.use(express.json());
 
+const cors = require('cors')
+
+app.use(cors())
+
 let users = [
   {
     id: 1,
@@ -54,7 +58,7 @@ app.get("/api/info", async (req, res) => {
 });
 
 app.get("/api/totalRecords", (request, response) => {
-  response.send(`<p>Total Records : ${users.length}</p>`);
+  response.send(`<p>Total Records registered : ${users.length}</p>`);
 });
 
 const generateId = () => {
@@ -64,6 +68,25 @@ const generateId = () => {
 
 app.post("/api/users", async (request, response) => {
   const body = request.body;
+
+  if (!body.name) {
+    return response.status(400).json({
+      error: `user's name is missing`,
+    });
+  } else if (!body.aadhaar) {
+    return response.status(400).json({
+      error: `user's aadhaar number is missing`,
+    });
+  } else if (!body.state) {
+    return response.status(400).json({
+      error: `user's state is missing`,
+    });
+  } else if (!body.vaccinated) {
+    return response.status(400).json({
+      error: `user's vaccinated status is missing`,
+    });
+  }
+
   console.log("body", body);
   const res = await fetch("https://api.ipify.org/?format=json", {
     method: "get",
@@ -91,7 +114,7 @@ app.get("/api/user/:id", (request, response) => {
   response.json(user);
 });
 
-app.get("/api/users/aadhaar/:aadhaar", (request, response) => {
+app.get("/api/user/aadhaar/:aadhaar", (request, response) => {
   const aadhaar = request.params.aadhaar;
   const user = users.find((user) => {
     return user.aadhaar === aadhaar;
@@ -119,7 +142,22 @@ app.delete("/api/users/:id", (request, response) => {
   response.status(204).end();
 });
 
-const PORT = 3001;
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+const requestLogger = (request, response, next) => {
+  console.log("Method:", request.method);
+  console.log("Path:  ", request.path);
+  console.log("Body:  ", request.body);
+  console.log("------");
+  next();
+};
+
+app.use(requestLogger);
+app.use(unknownEndpoint);
+
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
 });

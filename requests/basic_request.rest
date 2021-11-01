@@ -1,0 +1,13 @@
+GET http://localhost:3001/
+
+###
+
+GET http://localhost:3001/api/users
+
+###
+
+GET http://localhost:3001/api/info
+
+###
+
+GET  http://localhost:3001/api/totalRecords

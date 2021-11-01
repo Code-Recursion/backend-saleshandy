@@ -1,9 +1,9 @@
 POST http://localhost:3001/api/users
 Content-Type:application/json
 
-{
-    "adhar": "43567897654", 
-    "state": "KL",
-    "vaccinated" : true
+{   "name" : "dsf",
+    "aadhaar": "43567897654", 
+    "vaccinated": true,
+    "state" : "MP"
 }
 

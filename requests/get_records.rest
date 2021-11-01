@@ -2,8 +2,8 @@ GET http://localhost:3001/api/users
 
 ###
 
-GET http://localhost:3001/api/aadhaar/43567897654
+GET http://localhost:3001/api/user/aadhaar/85567845766
 
 ###
 
-GET http://localhost:3001/api/3
+GET http://localhost:3001/api/user/3
