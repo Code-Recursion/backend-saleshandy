@@ -1,24 +1,26 @@
 const mongoose = require("mongoose");
 
-const url = process.env.MONGODB_URI;
-
-console.log("connecting to", url);
-
-mongoose
-  .connect(url)
-  .then((result) => {
-    console.log("connected to MongoDB");
-  })
-  .catch((error) => {
-    console.log("error connecting to MongoDB:", error.message);
-  });
-
 const userSchema = new mongoose.Schema({
-  name: String,
-  aadhaar: String,
+  name: {
+    type: String,
+    required: true,
+  },
+  aadhaar: {
+    type: String,
+    required: true,
+    min: 12,
+    max: 12,
+  },
   createdDate: Date,
-  vaccinated: Boolean,
-  state: String,
+  vaccinated: {
+    type: Boolean,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+    length: 12,
+  },
   ip: String,
 });
 
