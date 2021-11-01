@@ -1,48 +1,52 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const fetch = require("node-fetch");
 app.use(express.json());
+const cors = require("cors");
 
-const cors = require('cors')
+app.use(cors());
 
-app.use(cors())
+const User = require("./models/user");
 
-let users = [
-  {
-    id: 1,
-    name: "Bruce Wayne",
-    created: "2021-11-01T03:15:37.758Z",
-    aadhaar: "43567897654",
-    ip: "171.61.58.51",
-    state: "KL",
-    vaccinated: true,
-  },
-  {
-    id: 2,
-    name: "Alan Walker",
-    created: "2021-11-01T03:15:37.758Z",
-    aadhaar: "32456567567",
-    ip: "171.61.58.51",
-    state: "KL",
-    vaccinated: false,
-  },
-  {
-    id: 3,
-    name: "Peter Parker",
-    created: "2021-11-01T03:15:37.758Z",
-    aadhaar: "85567845766",
-    ip: "171.61.58.51",
-    state: "KL",
-    vaccinated: true,
-  },
-];
+// let users = [
+//   {
+//     id: 1,
+//     name: "Bruce Wayne",
+//     created: "2021-11-01T03:15:37.758Z",
+//     aadhaar: "43567897654",
+//     ip: "171.61.58.51",
+//     state: "KL",
+//     vaccinated: true,
+//   },
+//   {
+//     id: 2,
+//     name: "Alan Walker",
+//     created: "2021-11-01T03:15:37.758Z",
+//     aadhaar: "32456567567",
+//     ip: "171.61.58.51",
+//     state: "KL",
+//     vaccinated: false,
+//   },
+//   {
+//     id: 3,
+//     name: "Peter Parker",
+//     created: "2021-11-01T03:15:37.758Z",
+//     aadhaar: "85567845766",
+//     ip: "171.61.58.51",
+//     state: "KL",
+//     vaccinated: true,
+//   },
+// ];
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
 });
 
 app.get("/api/users", (request, response) => {
-  response.json(users);
+  User.find({}).then((users) => {
+    response.json(users);
+  });
 });
 
 app.get("/api/info", async (req, res) => {
@@ -69,49 +73,79 @@ const generateId = () => {
 app.post("/api/users", async (request, response) => {
   const body = request.body;
 
-  if (!body.name) {
+  if (body.name === undefined) {
     return response.status(400).json({
       error: `user's name is missing`,
     });
-  } else if (!body.aadhaar) {
+  } else if (body.aadhaar === undefined) {
     return response.status(400).json({
       error: `user's aadhaar number is missing`,
     });
-  } else if (!body.state) {
+  } else if (body.state === undefined) {
     return response.status(400).json({
       error: `user's state is missing`,
     });
-  } else if (!body.vaccinated) {
+  } else if (body.vaccinated === undefined) {
     return response.status(400).json({
       error: `user's vaccinated status is missing`,
     });
+  } else if (body.aadhaar.length != 12) {
+    return response.status(400).json({
+      error: `invalid aadhaar number`,
+    });
   }
 
-  console.log("body", body);
   const res = await fetch("https://api.ipify.org/?format=json", {
     method: "get",
     headers: { "Content-Type": "application/json" },
   });
+
   const data = await res.json();
-  const user = {
-    id: generateId(),
-    created: new Date(),
-    aadhaar: body.aadhaar,
-    ip: data.ip,
-    state: body.state,
-    vaccinated: body.vaccinated,
-  };
-  users = users.concat(user);
-  response.json(user);
+
+  // const user = new User({
+  //   name: body.name,
+  //   aadhaar: body.aadhaar,
+  //   created: new Date(),
+  //   vaccinated: body.vaccinated,
+  //   state: body.state,
+  //   ip: data.ip,
+  // });
+  // console.log("user to be saved ", user);
+  // user.save().then((savedUser) => {
+  //   response.json(savedUser);
+  // });
+
+  const user = new User({
+    name: "abc mongo",
+    aadhaar: "586758695768",
+    vaccinated: true,
+    state: "MP",
+  });
+
+  user.save().then((result) => {
+    console.log("user saved!");
+  });
 });
 
 app.get("/api/user/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const user = users.find((record) => {
-    return record.id === id;
-  });
-  console.log("user ", user);
-  response.json(user);
+  // const id = Number(request.params.id);
+  // const user = users.find((record) => {
+  //   return record.id === id;
+  // });
+  // console.log("user ", user);
+
+  User.findById(request.params.id)
+    .then((user) => {
+      if (user) {
+        response.json(user);
+      } else {
+        reponse.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      response.status(400).send({ error: 'malformatted id' })
+    });
 });
 
 app.get("/api/user/aadhaar/:aadhaar", (request, response) => {
@@ -136,7 +170,7 @@ app.get("/api/ip", function (req, res) {
     });
 });
 
-app.delete("/api/users/:id", (request, response) => {
+app.delete("/api/user/:id", (request, response) => {
   const id = Number(request.params.id);
   users = users.filter((user) => user.id !== id);
   response.status(204).end();
@@ -157,7 +191,7 @@ const requestLogger = (request, response, next) => {
 app.use(requestLogger);
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
 });
