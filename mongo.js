@@ -21,16 +21,4 @@ const userSchema = new mongoose.Schema({
   ip: String,
 });
 
-
 module.exportss = mongoose.model("User", userSchema);
-
-// const user = new User({
-//   name: "abc mongo",
-//   aadhaar: "586758695768",
-//   vaccinated: true,
-//   state: "MP",
-// });
-
-// user.save().then((result) => {
-//   console.log("user saved!");
-// });

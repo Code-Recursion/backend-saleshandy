@@ -73,6 +73,7 @@ const generateId = () => {
 app.post("/api/users", async (request, response) => {
   const body = request.body;
 
+  //basic server side validation
   if (body.name === undefined) {
     return response.status(400).json({
       error: `user's name is missing`,
@@ -95,6 +96,7 @@ app.post("/api/users", async (request, response) => {
     });
   }
 
+  //generating ip for the user
   const res = await fetch("https://api.ipify.org/?format=json", {
     method: "get",
     headers: { "Content-Type": "application/json" },
@@ -127,13 +129,8 @@ app.post("/api/users", async (request, response) => {
   });
 });
 
-app.get("/api/user/:id", (request, response) => {
-  // const id = Number(request.params.id);
-  // const user = users.find((record) => {
-  //   return record.id === id;
-  // });
-  // console.log("user ", user);
-
+// get user by given id
+app.get("/api/user/:id", (request, response, next) => {
   User.findById(request.params.id)
     .then((user) => {
       if (user) {
@@ -142,12 +139,10 @@ app.get("/api/user/:id", (request, response) => {
         reponse.status(404).end();
       }
     })
-    .catch((error) => {
-      console.log(error);
-      response.status(400).send({ error: 'malformatted id' })
-    });
+    .catch((error) => next(error));
 });
 
+// get user by given aadhaar
 app.get("/api/user/aadhaar/:aadhaar", (request, response) => {
   const aadhaar = request.params.aadhaar;
   const user = users.find((user) => {
@@ -157,6 +152,7 @@ app.get("/api/user/aadhaar/:aadhaar", (request, response) => {
   response.json(user);
 });
 
+//get ip for the current user
 app.get("/api/ip", function (req, res) {
   var url = "https://api.ipify.org/?format=json";
   fetch(url)
@@ -170,15 +166,50 @@ app.get("/api/ip", function (req, res) {
     });
 });
 
+// delete user by given id
 app.delete("/api/user/:id", (request, response) => {
-  const id = Number(request.params.id);
-  users = users.filter((user) => user.id !== id);
-  response.status(204).end();
+  // const id = Number(request.params.id);
+  // users = users.filter((user) => user.id !== id);
+  // response.status(204).end();
+  users
+    .findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
+
+// app.put('/api/user/:id', (request, response, next) => {
+//   const body = request.body
+
+//   const user = {
+//     content: body.content,
+//     important: body.important,
+//   }
+
+//   Note.findByIdAndUpdate(request.params.id, note, { new: true })
+//     .then(updatedUser => {
+//       response.json(updatedUser)
+//     })
+//     .catch(error => next(error))
+// })
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
 };
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+// this has to be the last loaded middleware.
+app.use(errorHandler);
 
 const requestLogger = (request, response, next) => {
   console.log("Method:", request.method);
