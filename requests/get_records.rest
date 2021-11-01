@@ -2,8 +2,15 @@ GET http://localhost:3001/api/users
 
 ###
 
-GET http://localhost:3001/api/user/aadhaar/85567845766
+GET http://localhost:3001/api/users/aadhaar/85567845766
 
 ###
 
-GET http://localhost:3001/api/user/3
+GET http://localhost:3001/api/users/617f70e729ece22cfae8407d
+
+###
+GET http://localhost:3001/api/users/state/Delhi
+
+###
+
+GET http://localhost:3001/api/users/count/year/2021

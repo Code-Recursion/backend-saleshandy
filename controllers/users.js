@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const userRouter = require("express").Router();
+const fetch = require("node-fetch");
 
 // userRouter.get("/", (request, response) => {
 //   response.send("<h1>Hello World!</h1>");
@@ -78,17 +79,6 @@ userRouter.post("/", async (request, response) => {
   user.save().then((savedUser) => {
     response.json(savedUser);
   });
-
-  // const user = new User({
-  //   name: "abc mongo",
-  //   aadhaar: "586758695768",
-  //   vaccinated: true,
-  //   state: "MP",
-  // });
-
-  // user.save().then((result) => {
-  //   console.log("user saved!");
-  // });
 });
 
 // get user by given id
@@ -141,4 +131,28 @@ userRouter.delete("/:id", (request, response) => {
     .catch((error) => next(error));
 });
 
+// TODO ::
+
+// The total vaccine was taken by users grouped by Daily, Weekly, Monthly and Yearly
+// Filter values by Location (State)
+// Filter values by date range (Required Param)
+// Start Date
+// End Date
+
+userRouter.get("/state/:state", (request, response) => {
+  const body = request.params.state;
+  console.log("body ", body);
+  User.find({ state: body }).then((res) => {
+    response.send(res);
+  });
+});
+
+
+// userRouter.get("/count/year/:year", (request, reponse) => {
+//   const year = request.params.year
+//   const user = User.find((user) => {
+//     return new Date(user.created).getFullYear() === year;
+//   });
+//   reponse.send(user)
+// })
 module.exports = userRouter;

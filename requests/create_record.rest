@@ -2,8 +2,8 @@ POST http://localhost:3001/api/users
 Content-Type:application/json
 
 {   
-    "name" : "aasdfasdf asdfr",
-    "aadhaar": "185849675856", 
-    "vaccinated": false,
-    "state" : "DL"
+    "name" : "again date test",
+    "aadhaar": "779855954456", 
+    "vaccinated": true,
+    "state" : "Delhi"
 }
